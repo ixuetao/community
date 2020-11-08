@@ -1,15 +1,17 @@
 package com.xuetao.java.demo.controller;
 import com.xuetao.java.demo.dto.AccessTokenDTO;
 import com.xuetao.java.demo.dto.GithubUser;
+import com.xuetao.java.demo.mapper.UserMapper;
+import com.xuetao.java.demo.model.User;
 import com.xuetao.java.demo.provider.GithubProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 @Controller
 public class AuthorizeController {
@@ -25,10 +27,13 @@ public class AuthorizeController {
     @Value("${github.token}")
     private String token;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @GetMapping("/callback")
     public  String callback(@RequestParam(name = "code") String code,
                             @RequestParam(name="state") String state,
-                            HttpServletRequest request
+                             HttpServletResponse response
                             ){
         AccessTokenDTO accessTokenDTO = new AccessTokenDTO();
         accessTokenDTO.setClient_id(clientId);
@@ -37,11 +42,22 @@ public class AuthorizeController {
         accessTokenDTO.setRedirect_uri(redirectUri);
         accessTokenDTO.setState(state);
         String accessToken = githubProvider.getAccessToken(accessTokenDTO);
-        GithubUser user = githubProvider.getUser(token);
-        if(user!=null){
+        GithubUser githubUser = githubProvider.getUser(token);
+        if(githubUser!=null){
+            User user = new User();
+            String tokenUUID = UUID.randomUUID().toString();
+            user.setToken(tokenUUID);
+            user.setName(githubUser.getName());
+            user.setAccountId(String.valueOf(githubUser.getId()));
+            user.setGmtCreate(System.currentTimeMillis());
+            user.setGmtModified(user.getGmtCreate());
+            user.setAvatarUrl(githubUser.getAvatar_url());
+            userMapper.insert(user);
+            response.addCookie(new Cookie("token",tokenUUID));
             //登录成功，写cookie和session
-            HttpSession session = request.getSession();
-            session.setAttribute("user",user);
+
+            //HttpSession session = request.getSession();
+            //session.setAttribute("user",githubUser);
             return "redirect:/";//将页面重定向到index
 
         }else{

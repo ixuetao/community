@@ -1,7 +1,6 @@
 package com.xuetao.java.demo.provider;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.xuetao.java.demo.dto.AccessTokenDTO;
 import com.xuetao.java.demo.dto.GithubUser;
 import okhttp3.*;
