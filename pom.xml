@@ -81,6 +81,14 @@
             <version>1.18.16</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- 热部署 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+            <!--<scope>true</scope>-->
+        </dependency>
     </dependencies>
 
     <build>
@@ -89,6 +97,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- 没有该配置，devtools不生效 -->
                     <fork>true</fork>
                     <!-- spring-boot:run 中文乱码解决 -->
                     <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
@@ -109,7 +118,6 @@
                         <artifactId>h2</artifactId>
                         <version>1.4.200</version>
                     </dependency>
-
                 </dependencies>
             </plugin>
         </plugins>
